@@ -64,48 +64,48 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01, transition: { duration: 0.2 } }}
+      whileHover={{ y: -3, scale: 1.01, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden bg-bg-surface/85 backdrop-blur-md border border-border-subtle rounded-3xl p-5 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-border-strong/50 transition-all select-none group min-h-[178px]",
+        "relative overflow-hidden bg-bg-surface/85 backdrop-blur-md border border-border-subtle rounded-2xl p-3.5 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-border-strong/40 transition-all select-none group min-h-[130px]",
         className
       )}
     >
       {/* Background glow hover effect */}
       <div 
-        className="absolute -right-12 -top-12 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+        className="absolute -right-12 -top-12 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none"
         style={{ backgroundColor: themeColor }}
       />
 
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2.5">
         {/* Left: Metadata */}
         <div className="min-w-0 flex-1 z-10">
-          <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest block truncate">
+          <span className="text-[9px] font-extrabold text-text-tertiary uppercase tracking-widest block truncate">
             {label}
           </span>
-          <span className="text-2xl font-mono font-bold text-text-primary mt-1 block tracking-tight truncate">
+          <span className="text-[20px] font-mono font-bold text-text-primary mt-0.5 block tracking-tight truncate leading-none">
             {value}
           </span>
         </div>
 
         {/* Right: Icon Box */}
         <div className={cn(
-          "w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-inner z-10 transition-transform group-hover:scale-105", 
+          "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-inner z-10 transition-transform group-hover:scale-105", 
           iconColor === 'text-accent-primary' ? 'bg-accent-primary-soft' : 
           iconColor === 'text-accent-amber' ? 'bg-accent-amber-soft' : 
           iconColor === 'text-accent-red' ? 'bg-accent-red-soft' : 'bg-accent-blue-soft'
         )}>
-          <span className={iconColor}>{icon}</span>
+          <span className={cn(iconColor, "flex items-center justify-center [&>svg]:w-[16px] [&>svg]:h-[16px]")}>{icon}</span>
         </div>
       </div>
 
       {/* Interactive Micro AreaChart */}
       {data && data.length > 0 && (
-        <div className="h-10 mt-3 w-full shrink-0 overflow-visible relative z-10">
+        <div className="h-8 mt-2 w-full shrink-0 overflow-visible relative z-10">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
               <defs>
                 <linearGradient id={`grad-${chartId}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={themeColor} stopOpacity={0.25} />
+                  <stop offset="0%" stopColor={themeColor} stopOpacity={0.2} />
                   <stop offset="100%" stopColor={themeColor} stopOpacity={0.0} />
                 </linearGradient>
               </defs>
@@ -117,10 +117,10 @@ export const KpiCard: React.FC<KpiCardProps> = ({
                 type="monotone"
                 dataKey="val"
                 stroke={themeColor}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 fill={`url(#grad-${chartId})`}
                 dot={{ r: 0 }}
-                activeDot={{ r: 4, stroke: '#FFFFFF', strokeWidth: 1.5 }}
+                activeDot={{ r: 3.5, stroke: '#FFFFFF', strokeWidth: 1 }}
                 animationDuration={650}
               />
             </AreaChart>
@@ -129,14 +129,14 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       )}
 
       {/* Bottom details & change status */}
-      <div className="flex items-center justify-between gap-4 mt-3 z-10">
-        <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-wider">
+      <div className="flex items-center justify-between gap-3 mt-2 z-10">
+        <span className="text-[8px] font-bold text-text-tertiary uppercase tracking-wider">
           Live Telemetry
         </span>
 
         {delta && (
           <div className={cn(
-            "text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg border leading-none shrink-0", 
+            "text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-md border leading-none shrink-0", 
             deltaColors[deltaType]
           )}>
             {delta}
