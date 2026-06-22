@@ -1,8 +1,7 @@
 import React from 'react';
 import {
-  RadialBarChart, RadialBar, ResponsiveContainer, Tooltip,
+  RadialBarChart, RadialBar, ResponsiveContainer, Tooltip
 } from 'recharts';
-import { Badge } from '../ui/Badge';
 import { Activity, ArrowUpRight } from 'lucide-react';
 
 interface TrafficBarChartProps {

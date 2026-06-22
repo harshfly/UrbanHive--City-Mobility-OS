@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip
 } from 'recharts';
-import { Leaf, Info } from 'lucide-react';
+import { Leaf } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
 interface VehicleAreaChartProps {

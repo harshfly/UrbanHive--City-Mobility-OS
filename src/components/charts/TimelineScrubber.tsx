@@ -1,14 +1,21 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import timelineData from '../../mock/timelineHistory.json';
+
+interface TimelineDataItem {
+  minuteOfDay: number;
+  congestionLevel: number;
+}
+
+const typedTimelineData = timelineData as TimelineDataItem[];
 
 // Sample 1440 minutes into 72 bars (20-min increments)
 const bars = Array.from({ length: 72 }, (_, i) => {
   const startMin = i * 20;
   const endMin = startMin + 20;
-  const slice = timelineData.filter(
-    (d: any) => d.minuteOfDay >= startMin && d.minuteOfDay < endMin
+  const slice = typedTimelineData.filter(
+    (d) => d.minuteOfDay >= startMin && d.minuteOfDay < endMin
   );
-  const avg = slice.length > 0 ? slice.reduce((s: number, d: any) => s + d.congestionLevel, 0) / slice.length : 0;
+  const avg = slice.length > 0 ? slice.reduce((s: number, d) => s + d.congestionLevel, 0) / slice.length : 0;
   return { barIdx: i, minuteOfDay: startMin, congestionLevel: Math.round(avg) };
 });
 
@@ -34,27 +41,27 @@ export const TimelineScrubber: React.FC<{ className?: string }> = ({ className }
 
   const currentBarIdx = Math.floor(scrubMin / 20);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    isDragging.current = true;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    updateFromPointer(e.clientX);
-  }, []);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging.current) return;
-    updateFromPointer(e.clientX);
-  }, []);
-
-  const handlePointerUp = useCallback(() => {
-    isDragging.current = false;
-  }, []);
-
-  const updateFromPointer = (clientX: number) => {
+  const updateFromPointer = useCallback((clientX: number) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     setScrubMin(Math.round(pct * 1440));
-  };
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDragging.current = true;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    updateFromPointer(e.clientX);
+  }, [updateFromPointer]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    updateFromPointer(e.clientX);
+  }, [updateFromPointer]);
+
+  const handlePointerUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
 
   // Arrow key support
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {

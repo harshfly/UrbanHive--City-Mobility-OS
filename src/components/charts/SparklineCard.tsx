@@ -1,6 +1,6 @@
 import React from 'react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { cn } from '../ui/Badge';
+import { cn } from '../../theme/cn';
 import { useNavigate } from 'react-router-dom';
 
 interface SparklineCardProps {
@@ -22,7 +22,18 @@ const formatValue = (val: number, type?: string) => {
   return `${val}`;
 };
 
-const CustomTooltip = ({ active, payload, valueType }: any) => {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: {
+    value: number;
+    payload: {
+      label: string;
+    };
+  }[];
+  valueType?: string;
+}
+
+const CustomTooltip = ({ active, payload, valueType }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-bg-surface border border-border-subtle rounded-xl px-3 py-2 shadow-lg flex flex-col gap-0.5">

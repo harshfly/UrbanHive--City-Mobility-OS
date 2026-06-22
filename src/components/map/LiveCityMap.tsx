@@ -102,16 +102,26 @@ export const LiveCityMap: React.FC<LiveCityMapProps> = ({
   const finalZoom = zoom || activeConfig.zoom;
 
   useEffect(() => {
-    setLoading(true);
     if (junctionsOverride) {
-      setJunctions(junctionsOverride);
-      setLoading(false);
+      Promise.resolve().then(() => {
+        setJunctions(junctionsOverride);
+        setLoading(false);
+      });
       return;
     }
-    fetchJunctions().then((data) => {
-      setJunctions(data);
-      setLoading(false);
+    Promise.resolve().then(() => {
+      setLoading(true);
     });
+    let active = true;
+    fetchJunctions().then((data) => {
+      if (active) {
+        setJunctions(data);
+        setLoading(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [junctionsOverride, selectedCityName]);
 
   if (loading) {
