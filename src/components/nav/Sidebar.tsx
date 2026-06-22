@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  Home, Network, Cpu, Siren, Zap, MapPin, BarChart3, Camera,
+  Home, Network, Cpu, Siren, Zap, MapPin, BarChart3, Camera, LogOut,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { cn } from '../../theme/cn';
@@ -107,17 +107,32 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Footer / System Status */}
-      <div className="p-4 border-t border-border-subtle bg-bg-canvas/30">
-        <div className="flex items-center gap-3 p-3 bg-bg-surface border border-border-subtle rounded-2xl shadow-[0_4px_16px_rgba(16,20,36,0.03)] hover:border-border-strong transition-all duration-300">
-          <div className="relative flex items-center justify-center shrink-0">
-            <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-accent-primary opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-primary" />
+      {/* Footer / User Profile & Logout */}
+      <div className="p-4 border-t border-border-subtle bg-bg-canvas/30 flex flex-col gap-2">
+        <div className="flex items-center justify-between p-2.5 bg-bg-surface border border-border-subtle rounded-2xl shadow-[0_4px_16px_rgba(16,20,36,0.03)] hover:border-border-strong transition-all duration-300 group">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Avatar with dynamic status indicator */}
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-primary to-accent-blue flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-inner">
+              HV
+              {/* Active green indicator dot */}
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border border-white" />
+              </span>
+            </div>
+            {/* User Details */}
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] font-bold text-text-primary leading-none truncate">Harsh Vyas</span>
+              <span className="text-[9px] font-semibold text-text-tertiary mt-1 truncate">Control Officer</span>
+            </div>
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-text-primary leading-none">System Core</span>
-            <span className="text-[10px] font-mono text-text-tertiary mt-1 truncate">v1.2.4 (Indore Cloud)</span>
-          </div>
+          {/* Action icon (Log Out / Sign Out / Power button) */}
+          <button 
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-text-secondary hover:text-accent-red hover:bg-accent-red-soft transition-colors cursor-pointer shrink-0"
+            title="Log Out"
+          >
+            <LogOut size={13} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
     </aside>
