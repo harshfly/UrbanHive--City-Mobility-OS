@@ -11,6 +11,7 @@ import { showToast } from '../components/ui/Toast';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { BatteryCharging, ShieldAlert } from 'lucide-react';
+import { V2GGridController } from '../components/ev/V2GGridController';
 
 const cityConfig: Record<string, { center: [number, number]; zoom: number }> = {
   'Indore (Vijay Nagar)': { center: [22.7250, 75.8720], zoom: 13 },
@@ -284,6 +285,11 @@ const EvCharging: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* V2G Smart Grid Controller */}
+      <div className="mt-6">
+        <V2GGridController />
       </div>
     </motion.div>
   );
