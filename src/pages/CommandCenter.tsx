@@ -14,6 +14,7 @@ import { AlertCard } from '../components/cards/AlertCard';
 import { useAlertStore } from '../store/useAlertStore';
 import { Badge } from '../components/ui/Badge';
 import { motion } from 'framer-motion';
+import { WeatherSandbox } from '../components/environment/WeatherSandbox';
 
 // Sparkline data
 const junctionSparkline = [
@@ -143,8 +144,15 @@ const CommandCenter: React.FC = () => {
         </div>
       </div>
 
-      {/* Timeline Scrubber */}
-      <TimelineScrubber />
+      {/* Environment Sandbox & Timeline */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-8">
+          <TimelineScrubber />
+        </div>
+        <div className="xl:col-span-4">
+          <WeatherSandbox />
+        </div>
+      </div>
     </motion.div>
   );
 };
