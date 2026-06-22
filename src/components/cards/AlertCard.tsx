@@ -1,7 +1,7 @@
 import React from 'react';
 import { Siren, Clock, CheckCircle2 } from 'lucide-react';
 import { Alert } from '../../types';
-import { cn } from '../ui/Badge';
+import { cn } from '../../theme/cn';
 
 interface AlertCardProps {
   alert: Alert;

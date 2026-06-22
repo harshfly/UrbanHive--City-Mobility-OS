@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Siren, Clock, CheckCircle2 } from 'lucide-react';
 import { useAlertStore } from '../../store/useAlertStore';
-import { cn } from '../ui/Badge';
+import { cn } from '../../theme/cn';
 
 export const AlertBell: React.FC = () => {
   const [open, setOpen] = useState(false);

@@ -2,7 +2,7 @@ import React from 'react';
 import { ShieldCheck, ShieldAlert, ShieldOff } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { AIMode } from '../../types';
-import { cn } from '../ui/Badge';
+import { cn } from '../../theme/cn';
 
 const modes: { value: AIMode; label: string; icon: React.ReactNode }[] = [
   { value: 'autonomous', label: 'Auto', icon: <ShieldCheck size={16} /> },

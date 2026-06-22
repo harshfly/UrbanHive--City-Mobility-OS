@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './Badge';
+import { cn } from '../../theme/cn';
 import { motion } from 'framer-motion';
 
 interface TabsProps {

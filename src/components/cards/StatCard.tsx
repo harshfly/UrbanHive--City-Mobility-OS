@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../ui/Badge';
+import { cn } from '../../theme/cn';
 import { useNavigate } from 'react-router-dom';
 
 interface StatCardProps {

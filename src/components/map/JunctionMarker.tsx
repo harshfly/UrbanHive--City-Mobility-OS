@@ -1,5 +1,5 @@
 import React from 'react';
-import { Marker, Tooltip, useMap } from 'react-leaflet';
+import { Marker, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import { Junction } from '../../types';
 import { useNavigate } from 'react-router-dom';
