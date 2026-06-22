@@ -89,7 +89,7 @@ const MapViewUpdater: React.FC<{ center: [number, number]; zoom: number }> = ({ 
 const MapZoomControls: React.FC = () => {
   const map = useMap();
   return (
-    <div className="absolute bottom-20 right-4 z-[1000] flex flex-col gap-1.5 shadow-lg">
+    <div className="absolute bottom-[185px] right-4 z-[1000] flex flex-col gap-1.5 shadow-lg">
       <button
         onClick={() => map.zoomIn()}
         className="w-10 h-10 flex items-center justify-center bg-bg-surface/90 hover:bg-bg-surface text-text-primary hover:text-accent-primary border border-border-subtle rounded-t-xl active:scale-95 transition-all font-bold text-lg cursor-pointer backdrop-blur-md"
@@ -346,9 +346,7 @@ export const LiveCityMap: React.FC<LiveCityMapProps> = ({
         dragConstraints={mapContainerRef}
         dragElastic={0.02}
         dragMomentum={false}
-        className={`absolute z-[1000] flex flex-col gap-2 bg-bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl p-3.5 shadow-lg max-w-[180px] cursor-grab active:cursor-grabbing left-4 ${
-          showCamera && cameraFeedOpen ? 'top-[185px]' : 'top-4'
-        }`}
+        className="absolute bottom-4 left-4 z-[1000] flex flex-col gap-2 bg-bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl p-3.5 shadow-lg max-w-[180px] cursor-grab active:cursor-grabbing"
       >
         <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest flex items-center gap-1.5 mb-1.5 pointer-events-none select-none">
           <Layers size={10} className="text-accent-primary" /> Map Layers
@@ -409,7 +407,7 @@ export const LiveCityMap: React.FC<LiveCityMapProps> = ({
           dragConstraints={mapContainerRef}
           dragElastic={0.02}
           dragMomentum={false}
-          className="absolute bottom-4 left-4 z-[1000] cursor-grab active:cursor-grabbing"
+          className="absolute bottom-4 right-4 z-[1000] cursor-grab active:cursor-grabbing"
         >
           <MapLegend />
         </motion.div>
