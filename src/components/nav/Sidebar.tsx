@@ -113,7 +113,7 @@ export const Sidebar: React.FC = () => {
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Avatar with dynamic status indicator */}
             <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-primary to-accent-blue flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-inner">
-              HV
+              HM
               {/* Active green indicator dot */}
               <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -122,7 +122,7 @@ export const Sidebar: React.FC = () => {
             </div>
             {/* User Details */}
             <div className="flex flex-col min-w-0">
-              <span className="text-[11px] font-bold text-text-primary leading-none truncate">Harsh Vyas</span>
+              <span className="text-[11px] font-bold text-text-primary leading-none truncate">Harsh Malviya</span>
               <span className="text-[9px] font-semibold text-text-tertiary mt-1 truncate">Control Officer</span>
             </div>
           </div>
