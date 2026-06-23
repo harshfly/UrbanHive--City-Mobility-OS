@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Tabs } from '../components/ui/Tabs';
 import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
 import { LiveCityMap } from '../components/map/LiveCityMap';
 import { PageHeader } from '../layouts/PageHeader';
 import { runSimulation } from '../api/simulation.api';
@@ -9,7 +8,6 @@ import { fetchJunctions } from '../api/junctions.api';
 import { Junction } from '../types';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar } from 'recharts';
 import { motion } from 'framer-motion';
-import { Cpu, Zap } from 'lucide-react';
 
 const scenarios = [
   { id: 'add-vehicles', label: '+ Add 200 vehicles (north zone)' },
@@ -107,7 +105,7 @@ const DigitalTwin: React.FC = () => {
           </div>
 
           {/* Map */}
-          <div style={{ height: 500 }} className="relative">
+          <div className="relative h-[350px] lg:h-[500px]">
             <LiveCityMap
               className="h-full"
               junctionsOverride={forecastJunctions}
@@ -177,16 +175,13 @@ const DigitalTwin: React.FC = () => {
               {/* Dual Visuals */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 {/* Simulation Efficacy Rings */}
-                <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
+                <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[300px]">
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Simulation Efficiency Rings</h3>
-                      <Badge variant="blue">Model Results</Badge>
-                    </div>
-                    <p className="text-xs text-text-secondary">Simulated performance gains across core mobility efficiency metrics.</p>
+                    <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Simulation Efficiency</h3>
+                    <p className="text-xs text-text-secondary">Simulated performance gains across core metrics.</p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center my-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center flex-1 my-4">
                     <div className="h-40 flex items-center justify-center relative">
                       <ResponsiveContainer width="100%" height="100%">
                         <RadialBarChart
@@ -202,7 +197,7 @@ const DigitalTwin: React.FC = () => {
                           ]}
                         >
                           <RadialBar background={{ fill: '#F5F5F7' }} dataKey="value" cornerRadius={12} />
-                          <Tooltip />
+                          <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', fontSize: '12px', fontWeight: 'bold' }} />
                         </RadialBarChart>
                       </ResponsiveContainer>
                       <div className="absolute w-4 h-4 bg-bg-canvas border border-border-subtle rounded-full" />
@@ -224,25 +219,15 @@ const DigitalTwin: React.FC = () => {
                       ))}
                     </div>
                   </div>
-
-                  <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">AI Simulation Insight</span>
-                    <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-                      <Cpu size={14} className="text-accent-primary shrink-0 mt-0.5" />
-                      <p>
-                        Applying pre-emptive signal synchronization on corridor intersections decreases the travel time index by <strong className="font-bold text-accent-primary">38%</strong>.
-                      </p>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Line Chart Comparison */}
-                <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
+                <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[300px]">
                   <div>
                     <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Travel Time Comparison</h3>
                     <p className="text-xs text-text-secondary">Simulated path travel time trend over a 60-minute duration window.</p>
                   </div>
-                  <div className="h-44 my-4">
+                  <div className="flex-1 my-4">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={simChartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
                         <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#9098AC' }} axisLine={false} tickLine={false} />
@@ -253,21 +238,13 @@ const DigitalTwin: React.FC = () => {
                             border: '1px solid #E5E5EA',
                             borderRadius: 12,
                             fontSize: 11,
+                            fontWeight: 'bold'
                           }}
                         />
                         <Line type="monotone" dataKey="without" stroke="#FF3B30" strokeWidth={2} dot={false} name="Without AI" />
                         <Line type="monotone" dataKey="with" stroke="#34C759" strokeWidth={2} dot={false} name="With AI" />
                       </LineChart>
                     </ResponsiveContainer>
-                  </div>
-                  <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Queue Prediction</span>
-                    <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-                      <Zap size={14} className="text-accent-amber shrink-0 mt-0.5" />
-                      <p>
-                        UrbanHive AI model acts <strong className="font-bold">18 minutes ahead</strong> of the simulated vehicle surge to bypass queuing.
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>

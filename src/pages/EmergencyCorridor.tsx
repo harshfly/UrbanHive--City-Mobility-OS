@@ -2,11 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PageHeader } from '../layouts/PageHeader';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
-import { Badge } from '../components/ui/Badge';
 import { LiveCityMap } from '../components/map/LiveCityMap';
 import { CorridorRouteLayer } from '../components/map/CorridorRouteLayer';
 import { showToast } from '../components/ui/Toast';
-import { Siren, MapPin, Flame, ShieldCheck, Compass, ShieldAlert } from 'lucide-react';
+import { Siren, MapPin, Flame, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { CorridorTerminal } from '../components/emergency/CorridorTerminal';
@@ -61,8 +60,6 @@ const EmergencyCorridor: React.FC = () => {
     const sec = s % 60;
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
-
-
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -143,13 +140,10 @@ const EmergencyCorridor: React.FC = () => {
             </div>
 
             {/* Historical Emergency Chart (Circular) */}
-            <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-full min-h-[420px]">
+            <div className="bg-bg-surface border border-border-subtle rounded-2xl md:rounded-3xl p-6 shadow-sm flex flex-col h-[350px] lg:h-[400px]">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Historical Dispatch Split</h3>
-                  <Badge variant="red">Indore Logs</Badge>
-                </div>
-                <p className="text-xs text-text-secondary">Distribution of triggered signal pre-emptions by emergency vehicle category.</p>
+                <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Historical Dispatch Split</h3>
+                <p className="text-xs text-text-secondary">Distribution of triggered signal pre-emptions by emergency category.</p>
               </div>
 
               <div className="h-40 flex items-center justify-center relative my-4">
@@ -176,16 +170,16 @@ const EmergencyCorridor: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', fontSize: '12px', fontWeight: 'bold' }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-[8px] uppercase tracking-wider text-text-tertiary font-bold">Locks</span>
+                  <span className="text-[8px] uppercase tracking-wider text-text-tertiary font-bold">Total</span>
                   <span className="text-sm font-mono font-bold text-text-primary leading-none mt-0.5">582</span>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-2">
                 {[
                   { name: 'Ambulance Priority', value: 60, fill: '#FF3B30' },
                   { name: 'Fire Engine Override', value: 25, fill: '#FF9500' },
@@ -199,16 +193,6 @@ const EmergencyCorridor: React.FC = () => {
                     <span className="text-xs font-mono font-bold text-text-secondary">{item.value}%</span>
                   </div>
                 ))}
-              </div>
-
-              <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3 mt-4">
-                <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Pre-emption Safeguard</span>
-                <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-                  <Compass size={14} className="text-accent-primary shrink-0 mt-0.5" />
-                  <p>
-                    Corridor routing has achieved a <strong className="font-bold">99.2% zero-delay lock rate</strong> with no cross-traffic safety warnings.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -230,9 +214,9 @@ const EmergencyCorridor: React.FC = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* Map with corridor */}
-            <div className="lg:col-span-2 rounded-3xl overflow-hidden border border-border-subtle shadow-sm" style={{ height: 500 }}>
+            <div className="lg:col-span-2 rounded-2xl md:rounded-3xl overflow-hidden border border-border-subtle shadow-sm h-[350px] lg:h-[500px]">
               <LiveCityMap className="h-full" showCamera={false} showSearch={false}>
                 <CorridorRouteLayer path={corridorPath} />
               </LiveCityMap>
@@ -260,13 +244,13 @@ const EmergencyCorridor: React.FC = () => {
               </div>
 
               {/* Wave lock bar chart */}
-              <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between flex-1 min-h-[290px]">
+              <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[280px]">
                 <div>
                   <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Green Wave Priority Lock</h3>
-                  <p className="text-xs text-text-secondary">Intersection signal reservation lock index along the emergency path.</p>
+                  <p className="text-xs text-text-secondary">Intersection signal reservation lock index.</p>
                 </div>
 
-                <div className="h-32 my-3">
+                <div className="flex-1 my-3">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       layout="vertical"
@@ -279,7 +263,7 @@ const EmergencyCorridor: React.FC = () => {
                     >
                       <XAxis type="number" domain={[0, 100]} hide />
                       <YAxis dataKey="name" type="category" tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                      <Tooltip />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', fontSize: '12px', fontWeight: 'bold' }} />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
                         {[
                           { fill: '#FF3B30' },
@@ -291,16 +275,6 @@ const EmergencyCorridor: React.FC = () => {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-
-                <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-                  <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Safety Override</span>
-                  <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-                    <ShieldAlert size={14} className="text-accent-red shrink-0 mt-0.5" />
-                    <p>
-                      Automated signal override active. Side lanes are held at red phases to prevent crossway path conflicts.
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>

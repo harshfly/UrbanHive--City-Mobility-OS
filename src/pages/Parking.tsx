@@ -10,7 +10,6 @@ import 'leaflet/dist/leaflet.css';
 import { showToast } from '../components/ui/Toast';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Compass, ShieldAlert } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const cityConfig: Record<string, { center: [number, number]; zoom: number }> = {
@@ -54,9 +53,9 @@ const Parking: React.FC = () => {
 
   const getColor = (zone: ParkingZone) => {
     const ratio = zone.availableSpots / zone.totalSpots;
-    if (ratio === 0) return '#D6364F';
-    if (ratio < 0.3) return '#C77D12';
-    return '#0F8B6C';
+    if (ratio === 0) return '#FF3B30'; // accent-red (full)
+    if (ratio < 0.3) return '#FF9500'; // accent-amber (getting full)
+    return '#34C759'; // accent-green (plenty available)
   };
 
   const handleReserve = () => {
@@ -65,6 +64,26 @@ const Parking: React.FC = () => {
     showToast(`Spot ${spotNum} reserved for 15 minutes`, 'success');
     setReserveModal(false);
   };
+
+  // Dynamic Chart Data Calculations
+  const totalCitySpots = zones.reduce((acc, z) => acc + z.totalSpots, 0);
+  const availableCitySpots = zones.reduce((acc, z) => acc + z.availableSpots, 0);
+  const occupiedCitySpots = totalCitySpots - availableCitySpots;
+
+  const donutData = totalCitySpots > 0 ? [
+    { name: 'Available Spots', value: availableCitySpots, fill: '#34C759' },
+    { name: 'Occupied Spots', value: occupiedCitySpots, fill: '#FF3B30' },
+  ].filter(d => d.value > 0) : [];
+
+  const topOccupiedZones = [...zones]
+    .map(z => ({
+      name: z.name,
+      occupancyRatio: ((z.totalSpots - z.availableSpots) / z.totalSpots) * 100,
+      fill: ((z.totalSpots - z.availableSpots) / z.totalSpots) * 100 > 80 ? '#FF3B30' : 
+            ((z.totalSpots - z.availableSpots) / z.totalSpots) * 100 > 50 ? '#FF9500' : '#34C759'
+    }))
+    .sort((a, b) => b.occupancyRatio - a.occupancyRatio)
+    .slice(0, 5);
 
   if (loading) {
     return (
@@ -83,7 +102,7 @@ const Parking: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map */}
-        <div className="lg:col-span-2 rounded-3xl overflow-hidden border border-border-subtle shadow-sm" style={{ height: 520 }}>
+        <div className="lg:col-span-2 rounded-2xl md:rounded-3xl overflow-hidden border border-border-subtle shadow-sm h-[350px] lg:h-[520px]">
           <MapContainer
             center={activeConfig.center}
             zoom={activeConfig.zoom}
@@ -119,7 +138,7 @@ const Parking: React.FC = () => {
         </div>
 
         {/* Side panel */}
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl shadow-sm p-6 flex flex-col justify-between h-[520px]">
+        <div className="bg-bg-surface border border-border-subtle rounded-2xl md:rounded-3xl shadow-sm p-4 md:p-6 flex flex-col justify-between h-[350px] lg:h-[520px]">
           {selectedZone ? (
             <div className="flex flex-col gap-4">
               <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">{selectedZone.name}</h3>
@@ -140,7 +159,7 @@ const Parking: React.FC = () => {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${((selectedZone.totalSpots - selectedZone.availableSpots) / selectedZone.totalSpots) * 100}%`,
-                      backgroundColor: getColor(selectedZone),
+                      backgroundColor: getColor(selectedZone), // mapped correctly to status
                     }}
                   />
                 </div>
@@ -180,125 +199,80 @@ const Parking: React.FC = () => {
       {/* Circular Parking Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Card 1: Space Type Allocation Donut */}
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
+        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[280px]">
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Space Type Allocation</h3>
-              <Badge variant="blue">Smart Zoning</Badge>
-            </div>
-            <p className="text-xs text-text-secondary">Distribution of municipal parking bays classified by access permission tier.</p>
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">City-Wide Occupancy</h3>
+            <p className="text-xs text-text-secondary">Overall ratio of available to occupied parking bays.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center my-4">
-            <div className="h-40 flex items-center justify-center relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Short-term public', value: 60, fill: '#0071E3' },
-                      { name: 'Pre-booked EV', value: 25, fill: '#34C759' },
-                      { name: 'VIP Transit Bays', value: 10, fill: '#FF9500' },
-                      { name: 'Disabled Reserved', value: 5, fill: '#AEAEB2' },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={42}
-                    outerRadius={60}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {[
-                      { fill: '#0071E3' },
-                      { fill: '#34C759' },
-                      { fill: '#FF9500' },
-                      { fill: '#AEAEB2' },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-[8px] uppercase tracking-wider text-text-tertiary font-bold">Total Spots</span>
-                <span className="text-sm font-mono font-bold text-text-primary leading-none mt-0.5">2,450</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {[
-                { name: 'Public Spot', value: 60, fill: '#0071E3' },
-                { name: 'EV Reserved', value: 25, fill: '#34C759' },
-                { name: 'VIP Transit', value: 10, fill: '#FF9500' },
-                { name: 'Disabled', value: 5, fill: '#AEAEB2' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-border-subtle/50 pb-1.5 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                    <span className="text-xs font-bold text-text-primary truncate">{item.name}</span>
-                  </div>
-                  <span className="text-xs font-mono font-bold text-text-secondary">{item.value}%</span>
+          <div className="flex-1 flex items-center justify-center relative mt-4">
+            {donutData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={donutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                      dataKey="value"
+                      animationDuration={400}
+                    >
+                      {donutData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px', fontWeight: 'bold' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold">Total Spots</span>
+                  <span className="text-xl font-mono font-bold text-text-primary leading-none mt-0.5">{totalCitySpots}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-            <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Zoning Analytics</span>
-            <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-              <Compass size={14} className="text-accent-primary shrink-0 mt-0.5" />
-              <p>
-                EV reserved slots maintain a stable <strong className="font-bold text-accent-primary">85% daily turnover</strong>. Plan is to provision +10% next quarter.
-              </p>
-            </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">No Data Available</span>
+                <span className="text-[10px] text-text-tertiary mt-1 max-w-[200px] leading-relaxed">
+                  No parking zones exist in the selected city.
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Card 2: District Occupancy Bar Chart */}
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
+        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[280px]">
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">District Occupancy</h3>
-              <Badge variant="green">Auto-Optimized</Badge>
-            </div>
-            <p className="text-xs text-text-secondary">Average parking bay occupancy ratings computed across commercial districts.</p>
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Peak Occupied Zones</h3>
+            <p className="text-xs text-text-secondary">Parking zones currently experiencing the highest volume.</p>
           </div>
 
-          <div className="h-44 my-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={[
-                  { name: 'Palasia Market', value: 92, fill: '#FF3B30' },
-                  { name: 'Vijay Nagar Mall', value: 78, fill: '#0071E3' },
-                  { name: 'Bypass Corp', value: 45, fill: '#34C759' },
-                ]}
-                margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5F5F7" />
-                <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <RechartsTooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={28}>
-                  {[
-                    { fill: '#FF3B30' },
-                    { fill: '#0071E3' },
-                    { fill: '#34C759' },
-                  ].map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-            <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Pre-emption Safeguard</span>
-            <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-              <ShieldAlert size={14} className="text-accent-red shrink-0 mt-0.5" />
-              <p>
-                High load detected at Palasia. Reservation service automatically routes overspill drivers to bypass bays.
-              </p>
-            </div>
+          <div className="flex-1 mt-4">
+            {topOccupiedZones.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topOccupiedZones} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5F5F7" />
+                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <RechartsTooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px', fontWeight: 'bold' }} />
+                  <Bar dataKey="occupancyRatio" radius={[6, 6, 0, 0]} barSize={36} animationDuration={400}>
+                    {topOccupiedZones.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center h-full">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">No Data Available</span>
+                <span className="text-[10px] text-text-tertiary mt-1 max-w-[200px] leading-relaxed">
+                  No parking zones exist to calculate occupancy.
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

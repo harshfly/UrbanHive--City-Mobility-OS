@@ -8,7 +8,6 @@ import { fetchJunctions } from '../api/junctions.api';
 import { Junction } from '../types';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Compass, ShieldAlert } from 'lucide-react';
 
 const TrafficNetwork: React.FC = () => {
   const [junctions, setJunctions] = useState<Junction[]>([]);
@@ -20,10 +19,14 @@ const TrafficNetwork: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let active = true;
     fetchJunctions().then((data) => {
-      setJunctions(data);
-      setLoading(false);
+      if (active) {
+        setJunctions(data);
+        setLoading(false);
+      }
     });
+    return () => { active = false; };
   }, []);
 
   const zones = ['All', ...Array.from(new Set(junctions.map((j) => j.zone)))];
@@ -59,6 +62,25 @@ const TrafficNetwork: React.FC = () => {
     return <Badge variant={variant} dot>{statusMap[status] || status}</Badge>;
   };
 
+  // Dynamic Chart Data Calculations
+  const flowingCount = filtered.filter(j => j.status === 'green').length;
+  const predictedCount = filtered.filter(j => j.status === 'amber').length;
+  const criticalCount = filtered.filter(j => j.status === 'red').length;
+  const totalCount = filtered.length;
+
+  const donutData = totalCount > 0 ? [
+    { name: 'Flowing Status', value: flowingCount, fill: '#34C759' },
+    { name: 'Predicted Queue', value: predictedCount, fill: '#FF9500' },
+    { name: 'Critical Delay', value: criticalCount, fill: '#FF3B30' },
+  ].filter(d => d.value > 0) : [];
+
+  const zoneStats = Array.from(new Set(filtered.map(j => j.zone))).map(zone => {
+    const junctionsInZone = filtered.filter(j => j.zone === zone);
+    const avgWait = Math.round(junctionsInZone.reduce((acc, j) => acc + j.avgWaitSeconds, 0) / junctionsInZone.length);
+    const fill = avgWait > 45 ? '#FF3B30' : avgWait > 30 ? '#FF9500' : '#34C759';
+    return { name: zone, value: avgWait, fill };
+  }).sort((a, b) => b.value - a.value);
+
   if (loading) {
     return (
       <div>
@@ -77,7 +99,7 @@ const TrafficNetwork: React.FC = () => {
       <PageHeader title="Traffic Network" />
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <Select
           value={zoneFilter}
           options={zones.map((z) => ({ label: z, value: z }))}
@@ -89,6 +111,87 @@ const TrafficNetwork: React.FC = () => {
           onChange={setStatusFilter}
           className="max-w-sm"
         />
+      </div>
+
+      {/* Circular Network Analytics (Moved above table for visual hierarchy) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Card 1: Network Status Split Donut */}
+        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[280px]">
+          <div>
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Filtered Network Status Split</h3>
+            <p className="text-xs text-text-secondary">Proportion of filtered junctions by signal efficiency level.</p>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center relative mt-4">
+            {donutData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={donutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                      dataKey="value"
+                      animationDuration={400}
+                    >
+                      {donutData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px', fontWeight: 'bold' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-[9px] uppercase tracking-wider text-text-tertiary font-bold">Total</span>
+                  <span className="text-xl font-mono font-bold text-text-primary leading-none mt-0.5">{totalCount}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">No Data Available</span>
+                <span className="text-[10px] text-text-tertiary mt-1 max-w-[200px] leading-relaxed">
+                  No junctions match the selected filters.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Card 2: Zone Average Wait Times Bar Chart */}
+        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col h-[280px]">
+          <div>
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Zone Average Wait Times</h3>
+            <p className="text-xs text-text-secondary">Average wait times for filtered junctions across zones.</p>
+          </div>
+
+          <div className="flex-1 mt-4">
+            {zoneStats.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={zoneStats} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5F5F7" />
+                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 'dataMax + 10']} tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5EA', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px', fontWeight: 'bold' }} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36} animationDuration={400}>
+                    {zoneStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center h-full">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">No Data Available</span>
+                <span className="text-[10px] text-text-tertiary mt-1 max-w-[200px] leading-relaxed">
+                  No junctions match the selected filters to compute wait times.
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Table */}
@@ -135,134 +238,10 @@ const TrafficNetwork: React.FC = () => {
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div className="p-8 text-center text-text-tertiary text-sm">No junctions match the selected filters.</div>
+          <div className="p-8 text-center text-text-tertiary text-sm font-medium">No junctions match the selected filters.</div>
         )}
       </div>
 
-      {/* Circular Network Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        {/* Card 1: Network Status Split Donut */}
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Network Status Split</h3>
-              <Badge variant="green">Auto-Optimizing</Badge>
-            </div>
-            <p className="text-xs text-text-secondary">Proportion of city junctions categorized by current signal efficiency level.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center my-4">
-            <div className="h-40 flex items-center justify-center relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Flowing Status', value: 60, fill: '#34C759' },
-                      { name: 'Predicted Queue', value: 25, fill: '#FF9500' },
-                      { name: 'Critical Delay', value: 15, fill: '#FF3B30' },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={42}
-                    outerRadius={60}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {[
-                      { fill: '#34C759' },
-                      { fill: '#FF9500' },
-                      { fill: '#FF3B30' },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-[8px] uppercase tracking-wider text-text-tertiary font-bold">Total Hubs</span>
-                <span className="text-sm font-mono font-bold text-text-primary leading-none mt-0.5">12</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {[
-                { name: 'Flowing (Green)', value: 60, fill: '#34C759' },
-                { name: 'Predicted (Amber)', value: 25, fill: '#FF9500' },
-                { name: 'Critical (Red)', value: 15, fill: '#FF3B30' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-border-subtle/50 pb-1.5 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                    <span className="text-xs font-bold text-text-primary truncate">{item.name}</span>
-                  </div>
-                  <span className="text-xs font-mono font-bold text-text-secondary">{item.value}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-            <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Adaptive Insight</span>
-            <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-              <Compass size={14} className="text-accent-primary shrink-0 mt-0.5" />
-              <p>
-                Dynamic cycle re-timings mitigated <strong className="font-bold text-accent-primary">3 queue spikes</strong> in the East Zone. Cumulative wait index is down 12%.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Zone Average Wait Times Bar Chart */}
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 shadow-sm flex flex-col justify-between h-[390px]">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Zone Average Wait Times</h3>
-              <Badge variant="blue">Real-Time Delay</Badge>
-            </div>
-            <p className="text-xs text-text-secondary">Average intersection wait times in seconds segmented by active city zones.</p>
-          </div>
-
-          <div className="h-44 my-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={[
-                  { name: 'Central Zone', value: 54, fill: '#FF3B30' },
-                  { name: 'East Sector', value: 42, fill: '#FF9500' },
-                  { name: 'North Sector', value: 32, fill: '#0071E3' },
-                  { name: 'West Sector', value: 22, fill: '#34C759' },
-                ]}
-                margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5F5F7" />
-                <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 60]} tick={{ fontSize: 9, fill: '#8E8E93', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={26}>
-                  {[
-                    { fill: '#FF3B30' },
-                    { fill: '#FF9500' },
-                    { fill: '#0071E3' },
-                    { fill: '#34C759' },
-                  ].map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="bg-bg-canvas/50 border border-border-subtle/50 rounded-2xl p-3">
-            <span className="text-[9px] uppercase tracking-wider text-text-secondary font-bold block mb-1">Pre-emption Safeguard</span>
-            <div className="flex items-start gap-1.5 text-xs text-text-primary font-medium">
-              <ShieldAlert size={14} className="text-accent-red shrink-0 mt-0.5" />
-              <p>
-                Central Zone wait times exceed the 45s threshold. System triggers minor bypass cycle adjustments to flush queues.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 };

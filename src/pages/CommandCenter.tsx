@@ -15,6 +15,7 @@ import { useAlertStore } from '../store/useAlertStore';
 import { Badge } from '../components/ui/Badge';
 import { motion } from 'framer-motion';
 import { WeatherSandbox } from '../components/environment/WeatherSandbox';
+import { AIRecommendationsHero } from '../components/dashboard/AIRecommendationsHero';
 
 // Sparkline data
 const junctionSparkline = [
@@ -104,27 +105,32 @@ const CommandCenter: React.FC = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className="flex flex-col gap-4 md:gap-6"
     >
       {/* KPI Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <KpiCard label="Avg Travel Time" value="15 min" delta="-40% vs baseline" deltaType="positive" icon={<TrendingDown size={20} />} iconColor="text-accent-primary" data={travelTimeData} valSuffix=" min" />
-        <KpiCard label="Active Vehicles" value="4,812" icon={<Activity size={20} />} iconColor="text-accent-blue" data={activeVehiclesData} valSuffix=" vehicles" />
-        <KpiCard label="EV Charger Load" value="68%" icon={<Zap size={20} />} iconColor="text-accent-primary" data={evChargerLoadData} valSuffix="%" />
-        <KpiCard label="Parking Occupancy" value="82%" delta="Near capacity" deltaType="negative" icon={<ParkingCircle size={20} />} iconColor="text-accent-amber" data={parkingOccupancyData} valSuffix="%" />
-        <KpiCard label="CO₂ Saved Today" value="1.2t" icon={<Leaf size={20} />} iconColor="text-accent-primary" data={co2SavedData} valSuffix="t" />
+      <div className="order-2 md:order-1 flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 pb-2 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="snap-center shrink-0 w-[85vw] md:w-auto"><KpiCard label="Avg Travel Time" value="15 min" delta="-40% vs baseline" deltaType="positive" icon={<TrendingDown size={20} />} iconColor="text-accent-green" data={travelTimeData} valSuffix=" min" /></div>
+        <div className="snap-center shrink-0 w-[85vw] md:w-auto"><KpiCard label="Active Vehicles" value="4,812" icon={<Activity size={20} />} iconColor="text-accent-blue" data={activeVehiclesData} valSuffix=" vehicles" /></div>
+        <div className="snap-center shrink-0 w-[85vw] md:w-auto"><KpiCard label="EV Charger Load" value="68%" icon={<Zap size={20} />} iconColor="text-accent-blue" data={evChargerLoadData} valSuffix="%" /></div>
+        <div className="snap-center shrink-0 w-[85vw] md:w-auto"><KpiCard label="Parking Occupancy" value="82%" delta="Near capacity" deltaType="negative" icon={<ParkingCircle size={20} />} iconColor="text-accent-red" data={parkingOccupancyData} valSuffix="%" /></div>
+        <div className="snap-center shrink-0 w-[85vw] md:w-auto"><KpiCard label="CO₂ Saved Today" value="1.2t" icon={<Leaf size={20} />} iconColor="text-accent-green" data={co2SavedData} valSuffix="t" /></div>
+      </div>
+
+      {/* AI Recommendations Hub */}
+      <div className="order-3 md:order-2">
+        <AIRecommendationsHero />
       </div>
 
       {/* Main Row: Live Map & Alert Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="order-1 md:order-3 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         {/* Live Map */}
-        <div className="lg:col-span-9" style={{ minHeight: 520 }}>
+        <div className="lg:col-span-9 h-[350px] lg:h-[520px] rounded-2xl md:rounded-3xl overflow-hidden shadow-sm">
           <LiveCityMap className="h-full" />
         </div>
 
         {/* Alert Feed */}
-        <div className="lg:col-span-3">
-          <div className="bg-bg-surface border border-border-subtle rounded-3xl shadow-sm h-full flex flex-col overflow-hidden max-h-[520px]">
+        <div className="lg:col-span-3 h-[300px] lg:h-[520px]">
+          <div className="bg-bg-surface border border-border-subtle rounded-2xl md:rounded-3xl shadow-sm h-full flex flex-col overflow-hidden">
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-gradient-to-r from-bg-surface to-bg-canvas/10">
               <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Active Alerts</h3>
               <Badge variant="red">{alerts.filter(a => a.type !== 'resolved').length}</Badge>
@@ -146,30 +152,30 @@ const CommandCenter: React.FC = () => {
       </div>
 
       {/* Global Timeline Master Scrubber */}
-      <div className="w-full">
+      <div className="order-4 w-full">
         <TimelineScrubber className="!rounded-3xl" />
       </div>
 
       {/* Middle Row: Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="order-5 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
         <StatCard label="Road Closures" value="9" icon={<Cone size={20} />} tint="amber" to="/traffic" />
         <StatCard label="Incidents" value="4" icon={<ShieldAlert size={20} />} tint="red" to="/emergency-corridor" />
         <StatCard label="Avg Delay" value="11m" icon={<Clock size={20} />} tint="primary" />
       </div>
 
       {/* Primary Analytics & Simulation Control Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-5 shadow-sm">
+      <div className="order-6 grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+        <div className="bg-bg-surface border border-border-subtle rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm">
           <TrafficBarChart />
         </div>
-        <div className="bg-bg-surface border border-border-subtle rounded-3xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border-subtle rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm">
           <VehicleAreaChart />
         </div>
-        <WeatherSandbox />
+        <WeatherSandbox className="!p-4 md:!p-5 !rounded-2xl md:!rounded-3xl" />
       </div>
 
       {/* Performance Metrics & Trends */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="order-7 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <SparklineCard
           title="Vijay Nagar + AB Road"
           data={junctionSparkline}
