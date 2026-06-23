@@ -12,37 +12,32 @@ const StatusBar = ({ data, connected, alerts }) => {
     }
   }, [alerts, lastAlertCount]);
 
-  // Aggregate numbers
-  const totalVehicles = 4812; // Static as per requirements for tracked vehicles
   const avgSpeed = data?.traffic?.avg_speed || 0;
   const activeAlerts = alerts.length;
-  const lastUpdate = data?.timestamp ? new Date(data.timestamp).toLocaleTimeString('en-US') : 'Waiting...';
+  const lastUpdate = data?.timestamp ? new Date(data.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
 
   return (
-    <div className={`h-10 border-t flex items-center px-6 text-xs font-medium justify-between z-[1000] relative transition-colors duration-300 ${flash ? 'bg-yellow-100 border-yellow-300' : 'glass-dark text-gray-300 border-white/10'}`}>
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
-          {connected ? (
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-          ) : (
-            <div className="w-2 h-2 rounded-full border border-gray-400"></div>
-          )}
-          <span className={flash ? 'text-gray-900' : 'text-gray-300'}>
-            {connected ? 'Connected' : 'Reconnecting...'}
-          </span>
+    <footer className={`h-7 md:h-8 border-t flex items-center px-3 md:px-5 justify-between z-[1000] relative transition-colors duration-200 ${
+      flash ? 'bg-yellow-50 border-yellow-200' : 'bg-white/40 backdrop-blur-3xl border-white/40 text-gray-600'
+    }`}>
+      <div className="flex items-center gap-3 md:gap-5 text-[9px] md:text-[10px] font-semibold tracking-wide">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-300 animate-pulse'}`}></div>
+          <span className={flash ? 'text-gray-900' : ''}>{connected ? 'Online' : 'Reconnecting'}</span>
         </div>
-        
-        <div className="hidden sm:flex gap-6">
-          <span>Vehicles tracked: {totalVehicles.toLocaleString()}</span>
-          <span>Avg speed: {avgSpeed} km/h</span>
-          <span className={activeAlerts > 0 ? 'text-yellow-500' : ''}>Active alerts: {activeAlerts}</span>
-        </div>
+        <span className="hidden sm:inline text-gray-300">·</span>
+        <span className="hidden sm:inline">4,812 vehicles</span>
+        <span className="hidden sm:inline text-gray-300">·</span>
+        <span className="hidden sm:inline">{avgSpeed} km/h</span>
+        {activeAlerts > 0 && (
+          <>
+            <span className="text-gray-300">·</span>
+            <span className="text-amber-500 font-bold">{activeAlerts} alert{activeAlerts !== 1 ? 's' : ''}</span>
+          </>
+        )}
       </div>
-      
-      <div className="flex items-center gap-2">
-        <span>Last update: {lastUpdate}</span>
-      </div>
-    </div>
+      <span className="text-[9px] md:text-[10px] font-medium text-gray-400 tabular-nums">{lastUpdate}</span>
+    </footer>
   );
 };
 
