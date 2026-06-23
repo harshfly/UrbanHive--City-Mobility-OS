@@ -4,13 +4,13 @@ import { AIModeToggle } from './AIModeToggle';
 import { AlertBell } from './AlertBell';
 import { 
   User, Activity, Search, Command, Calendar, Clock, 
-  Sun, CloudRain, CloudFog, CloudLightning 
+  Sun, CloudRain, CloudFog, CloudLightning, Menu 
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { useEnvironmentStore } from '../../store/useEnvironmentStore';
 
 export const TopNav: React.FC = () => {
-  const { city } = useAppStore();
+  const { city, setMobileMenuOpen } = useAppStore();
   const { weather } = useEnvironmentStore();
   const [time, setTime] = useState(new Date());
 
@@ -52,10 +52,10 @@ export const TopNav: React.FC = () => {
   const current = weatherDetails[weather] || weatherDetails.sunny;
 
   return (
-    <header className="h-16 bg-bg-surface border-b border-border-subtle flex items-center justify-between px-6 z-20 shrink-0 shadow-[0_1px_2px_rgba(16,20,36,0.02)] gap-4">
+    <header className="h-16 bg-bg-surface border-b border-border-subtle flex items-center justify-between px-4 md:px-6 z-20 shrink-0 shadow-[0_1px_2px_rgba(16,20,36,0.02)] gap-2 md:gap-4">
       {/* Left: Dynamic Title */}
-      <div className="flex items-center gap-3 shrink-0">
-        <Activity size={18} className="text-accent-primary animate-pulse" />
+      <div className="flex items-center gap-2 md:gap-3 shrink-0">
+        <Activity size={18} className="text-accent-primary animate-pulse hidden md:block" />
         <div className="flex flex-col">
           <h1 className="text-xs font-bold text-text-primary leading-none uppercase tracking-wider">Indore UrbanHive</h1>
           <span className="text-[10px] text-text-tertiary mt-1 font-semibold">Zone: {city}</span>
@@ -79,7 +79,7 @@ export const TopNav: React.FC = () => {
       </div>
 
       {/* Right: Info Capsule & Controls */}
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-2 md:gap-4 shrink-0">
         {/* Live Info Capsule */}
         <div className="hidden xl:flex items-center gap-3 px-3 py-1.5 bg-bg-canvas border border-border-subtle rounded-xl text-[10px] font-mono font-bold text-text-secondary select-none shadow-sm whitespace-nowrap">
           <div className="flex items-center gap-1.5 border-r border-border-subtle pr-3 whitespace-nowrap">
@@ -96,12 +96,18 @@ export const TopNav: React.FC = () => {
           </div>
         </div>
 
-        <CitySelector />
-        <AIModeToggle />
-        <AlertBell />
-        <button className="w-8 h-8 rounded-full bg-accent-primary-soft flex items-center justify-center text-accent-primary hover:bg-accent-primary hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary">
-          <User size={16} />
-        </button>
+        {/* Hidden on mobile, moved to bottom drawer or assumed safe for desktop */}
+        <div className="hidden md:flex items-center gap-4">
+          <CitySelector />
+          <AIModeToggle />
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <AlertBell />
+          <button className="w-8 h-8 rounded-full bg-accent-primary-soft flex items-center justify-center text-accent-primary hover:bg-accent-primary hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary">
+            <User size={16} />
+          </button>
+        </div>
       </div>
     </header>
   );

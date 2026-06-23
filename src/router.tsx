@@ -10,6 +10,8 @@ import Parking from './pages/Parking';
 import Reports from './pages/Reports';
 import Cameras from './pages/Cameras';
 
+import PetrolPump from './pages/PetrolPump';
+
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -21,6 +23,7 @@ export const router = createBrowserRouter([
       { path: '/emergency-corridor', element: <EmergencyCorridor /> },
       { path: '/ev-charging', element: <EvCharging /> },
       { path: '/parking', element: <Parking /> },
+      { path: '/petrol-pumps', element: <PetrolPump /> },
       { path: '/reports', element: <Reports /> },
       { path: '/cameras', element: <Cameras /> },
     ],

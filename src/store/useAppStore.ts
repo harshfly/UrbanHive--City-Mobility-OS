@@ -14,6 +14,9 @@ interface AppState {
   /** Sidebar display state for premium compact screens */
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  /** Mobile bottom sheet toggle */
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -25,4 +28,6 @@ export const useAppStore = create<AppState>((set) => ({
   setActiveCorridorId: (activeCorridorId) => set({ activeCorridorId }),
   sidebarCollapsed: false,
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+  mobileMenuOpen: false,
+  setMobileMenuOpen: (mobileMenuOpen) => set({ mobileMenuOpen }),
 }));

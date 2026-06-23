@@ -24,6 +24,8 @@ export default {
         'accent-red-soft': '#FFE5E5',
         'accent-blue': '#0071E3',
         'accent-blue-soft': '#E5F1FF',
+        'accent-green': '#34C759',
+        'accent-green-soft': '#EAF9EE',
       },
       fontFamily: {
         display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'sans-serif'],
