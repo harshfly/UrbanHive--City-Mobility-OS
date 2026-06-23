@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -16,10 +16,62 @@ import ParkingLayer from './layers/ParkingLayer';
 import EVLayer from './layers/EVLayer';
 import PetrolLayer from './layers/PetrolLayer';
 import EmergencyLayer from './layers/EmergencyLayer';
+import InfraLayer from './layers/InfraLayer';
 
 const indoreCenter = [22.7196, 75.8577];
 
-const UrbanHiveMap = ({ data, activeLayers, onFeatureClick, emergencyCorridor }) => {
+const MapController = ({ center, zoom, onZoomEnd }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, zoom || map.getZoom(), {
+        animate: true,
+        duration: 1.2
+      });
+    }
+  }, [center, map]);
+
+  useEffect(() => {
+    if (zoom && zoom !== map.getZoom()) {
+      map.setZoom(zoom, { animate: true });
+    }
+  }, [zoom, map]);
+
+  useEffect(() => {
+    const handleZoomEnd = () => {
+      onZoomEnd(map.getZoom());
+    };
+    map.on('zoomend', handleZoomEnd);
+    return () => {
+      map.off('zoomend', handleZoomEnd);
+    };
+  }, [map, onZoomEnd]);
+
+  return null;
+};
+
+const tileUrls = {
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+};
+
+const tileAttributions = {
+  light: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  dark: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  satellite: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+};
+
+const UrbanHiveMap = ({ 
+  data, 
+  activeLayers, 
+  onFeatureClick, 
+  emergencyCorridor, 
+  mapCenter, 
+  mapZoom, 
+  onZoomEnd, 
+  mapStyle = 'light' 
+}) => {
   return (
     <MapContainer 
       center={indoreCenter} 
@@ -27,10 +79,19 @@ const UrbanHiveMap = ({ data, activeLayers, onFeatureClick, emergencyCorridor })
       zoomControl={false}
       className="w-full h-full"
     >
+      <MapController center={mapCenter} zoom={mapZoom} onZoomEnd={onZoomEnd} />
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        key={mapStyle}
+        url={tileUrls[mapStyle] || tileUrls.light}
+        attribution={tileAttributions[mapStyle] || tileAttributions.light}
       />
+
+      {activeLayers.infra && data?.infra && (
+        <InfraLayer 
+          infraData={data.infra} 
+          onClick={onFeatureClick} 
+        />
+      )}
 
       {activeLayers.traffic && data?.traffic?.roads && (
         <TrafficLayer 

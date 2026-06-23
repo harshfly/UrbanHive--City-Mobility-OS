@@ -11,8 +11,8 @@ const ParkingLayer = ({ lots, onClick }) => {
         const icon = L.divIcon({
           className: `custom-marker ${status}`,
           html: 'P',
-          iconSize: [28, 28],
-          iconAnchor: [14, 14]
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
         });
 
         return (
